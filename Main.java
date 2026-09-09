@@ -198,5 +198,33 @@ J04012 - Tính công
             + allowance = 200,000
 
     Step 3: Computing income & printing
-        The (toString()) method -> is called at
+        The (toString()) method -> is called automatically when we do (System.out.println(officer)).
+            -> it concatenates:
+            id + " " + name + " " + salary + " " + bonus + " " + allowance + " " + getIncome()
+                
+                + getIncome() -> returns salary + bonus + allowance = 1,338,500
+            
+        so the printed line becomes:
+            NV01 Nguyen Van A 1035000 103500 200000 1338500
+
+
+
+
+    3. Line-by-line Java Code Breakdown
+        The Officer class (fields + constructor)
+            class Officer {
+                private string id, name;
+                private int salary, bonus, allowance;
+
+                public Officer(String name, int wage, int workingDays, String role) {
+                    this.id = "NV01";
+                    this.name = name;
+                    this.salary = wage * workingDays;
+
+                        }
+                }
+            
+            
+            
+            }
 */
