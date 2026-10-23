@@ -965,4 +965,443 @@ public class Main {
     
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+J08011 — LIỆT KÊ VÀ ĐẾM
+
+Cho một dãy các số nguyên dương không quá 9 chữ số, mỗi số cách nhau vài khoảng trống, có thể xuống dòng. Hãy tìm các số không giảm (các chữ số theo thứ tự từ trái qua phải tạo thành dãy không giảm) và đếm số lần xuất hiện của các số đó.
+
+Input: Gồm các số nguyên dương không quá 9 chữ số. Không quá 10000 số.
+
+Output: Ghi ra các số không giảm kèm theo số lần xuất hiện. Các số được liệt kê theo thứ tự sắp xếp số lần xuất hiện giảm dần. Các số có số lần xuất hiện bằng nhau thì số nào xuất hiện trước in ra trước. 
+
+
+input:
+    123 321 23456 123 123 23456 3523 123 321 4567 8988 78 7654 9899 3456 123 678 999 78 3456 987654321 4546 63543 4656 13432 4563 123471 659837 454945 34355 9087 9977 98534 3456 23134
+output:
+    123 5
+    3456 3
+    23456 2
+    78 2
+    4567 1
+    678 1
+    999 1
+
+
+
+1. Problem Analysis
+
+"Non-decreasing" (Không giảm): This means the digits from left to right must be equal or larger. For example: 123 (1 ≤≤ 2 ≤≤ 3) is valid. 23456 is valid. 999 is valid. 321 is invalid (3 > 2).
+
+Input: Unknown number of integers, up to 9 digits long. (We must read them as String because we need to check digits, and 9 digits can safely fit in an int, but reading as String makes digit checking easier).
+
+Output: Valid numbers and their counts, sorted by frequency (descending), then by first appearance (ascending).
+
+
+
+2. The "Why" and "How" of Hashmap
+Imagine you ahve a massive library
+    + ArrayList: You have to walk shelf by shelf to find a book (slow).
+    + HashMap: You go to the librarian, give them the book title (the Key), and they instantly give you the book (the Value)
+
+In your code:
+    + Key: The number as a String (eg: "123")
+    + Value: The custom (num) object (which holds the string, count, and index)
+
+
+3. Line-by-line Walkthrough
+    Step 1: The Check Function
+        static boolean check(String a) {
+            for (int i = 1; i < a.length(); ++i) {
+                if (a.charAt(i) < a.charAt(i - 1)) return false;
+            }
+            return true;
+        }
+
+            + We loop from the second digit (i = 1)
+            + we compare the current digit (a.charAt(i)) with the previous digit (a.charAt(i - 1))
+            + If current digit is strictly smaller than the previous one, it's not "non-decreasing". -> return false
+                -> if the loop finishes, return true.
+
+    Step 2: The Custom Class (num)
+        static class num {
+            String num;
+            int cnt, stt;
+
+            public num(String num, int cnt, int stt) {
+                this.num = num;
+                this.cnt = cnt;
+                this.stt = stt;
+            }
+
+            @Override
+            public String toString() {
+                return num + " " + cnt;
+            }
+        }
+
+            -> Just like the palindrome problem, we bundle the data. num is the string, cnt is the frequency, stt is the original index (to handle ties).
+
+    Step 3: The Main Logic (Reading & Counting)
+        Scanner sc = new Scanner(System.in);
+        HashMap<String, num> hm = new HashMap<>();
+        ArrayList<num> a = new ArrayList<>();
+        int i = 0;
+
+        while (sc.hasNext()) {
+            String s = sc.next();
+            if (!check(s)) continue;  // skip if invalid
         
+            if (hm.get(s) == null) {
+                // BRAND NEW NUMBER
+                num x = new num(s, 1, i);
+                hm.put(s, x);   // add to dictionary
+                a.add(x);       // add to list (for sorting later)
+                i++;            // increase first-appearance index
+            }
+            else {
+                // NUMBER ALREADY EXISTS
+                hm.get(s).cnt += 1;
+            }
+        }
+
+            + hm.get(s) == null: this is the magic of HashMap. it asks the dictionary: "Do you ahve the key s? -> if answer is null -> it means we haven't seen this number before.
+            + if it's new, we create it (cnt = 1), put it in the HashMap, and add it to the ArrayList. we also assign it an stt (index i) and increment i.
+            + if it's not null -> it means we found a duplicate -> we use hm.get(s) -> to instantly grab the object and increase its cnt by 1
+                -> notice we don't need a break or a loop here. it's instant.
+
+    Step 4: Sorting
+        a.sort((num x, num y) -> {
+            if (x.cnt == y.cnt) return x.stt - y.stt;   // tie breaker: smaller index first
+            return y.cnt - x.cnt;   // descending order of count
+        })
+
+    Step 5: Printing
+        a.forEach(e -> System.out.println(e));
+
+        -> Loops through the sorted list and prints every object using its toString() method.
+
+
+
+
+
+import java.util.*;
+
+public class Main {
+    static boolean check(String a) {
+        for (int i = 1; i < a.length(); ++i) {
+            if (a.charAt(i) < a.charAt(i - 1)) return false;
+        }
+        return true;
+    }
+    static class num {
+        String num;
+        int cnt, stt;
+
+        public num(String num, int cnt, int stt) {
+            this.num = num;
+            this.cnt = cnt;
+            this.stt = stt;
+        }
+
+        @Override 
+        public String toString() {
+            return num + " " + cnt;
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        HashMap<String, num> hm = new HashMap<>();
+        ArrayList<num> a = new ArrayList<>();
+        int i = 0;
+        while (sc.hasNext()) {
+            String s = sc.next();
+            if (!check(s)) continue;
+
+            if (hm.get(s) == null) {
+                num x = new num(s   , 1, i);
+                hm.put(s, x);
+                a.add(x);
+            }
+            else hm.get(s).cnt += 1;
+        }
+        a.sort((num x, num y) -> {
+            if (x.cnt == y.cnt) return x.stt - y.stt;
+            return y.cnt - x.cnt;
+        });
+        a.forEach(e -> System.out.println(e));
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+cho dãy số a[] gồm có n phần tử
+
+-> đếm xem có bao nhiêu cặp (i, j) mà a[i] + a[j] = k cho trước
+
+input:
+    d1: t
+    + mỗi test: n và k
+    + dòng tiếp: a[i]...
+
+output: đáp án
+
+
+
+    input:
+        4
+        4 6
+        1 5 7 -1
+        5 6
+        1 5 7 -1 5
+        4 2
+        1 1 1 1
+        13 11
+        10 12 10 15 -1 7 6 5 4 2 1 1 1
+    output:
+        2
+        3
+        6
+        9
+
+
+1. The Core Idea (The "What")
+    -> We need to find pairs (a[i], a[j]) such that a[i] + a[j] = k
+        + imagine you have a sorted array. if you pick 1 number, say a[j], you instantly know what the other number must be: k - a[j]
+        
+        + because the array is sorted, all instances of k - a[j] -> will be sitting right next to each other. your code -> uses 2 special binary search functions (lower_bound and upper_bound) to instantly jump to first and last occurrence of that target number.
+
+
+2. Step by Step
+    Scanner sc = new Scanner(System.in);
+    int t = sc.nextInt();
+    while (t-- > 0) {
+        int n = sc.nextInt();
+        long k = sc.nextLong();     // target sum k
+        long[] a = new long[n];
+        for (int j = 0; j < n; ++j) {
+            a[j] = sc.nextLong();
+        }
+        Array.sort(a);      // sorting is the key
+    }
+        -> Why long? The problem states A[i] ≤ 10^18 and K ≤ 10^9 An int can only hold up to ≈2 × 10^9. If you use int, it will overflow. long is mandatory here.
+
+        Why Sort? Sorting allows us to use Binary Search later. Once sorted, all duplicate numbers are grouped together.
+
+
+    Step 2: The Main Loop
+        long ans = 0;
+        for (int j = 0; j < n - 1; ++j) {
+            long up = upper_bound(a, j + 1, n - 1, k - a[j]);
+            long dow = lower_bound(a, j + 1, n - 1, k - a[j]);
+
+            if (dow <= n - 1) {
+                ans += up - down + 1;
+            }
+        }
+        System.out.println(ans);
+
+            + WE loop j from 0 to n - 2 (because the second number must be after the first)
+            + k - a[j] is our Target -> we need to find how many times this Target exists in the array from index j + 1 -> to the end
+            + lower_bound -> finds the first index where the Target appears
+            + upper_bound -> finds the last index where the Target appears
+            + the math (up - down + 1) -> if the first occurance is at index 3 and the last is at index 5 -> number of occurences: 5 - 3 + 1 = 3
+            + if dow <= n - 1 -> the the target -> doesn't exist at all -> lower_bound returns r + 1 (which is n) 
+                -> preventing adding garbage number to (ans)
+
+3. Demystifying the Binary Search Functions
+    -> they find the boundaries of where it exists 
+    lower_bound (finds the FIRST occurence)
+        
+        public static long lower_bound(long[] a, int l, int r, long x) {
+            long ans = r + 1;       // default if not found
+            while (l <= r){
+                int m = (l + r) / 2;
+                if (a[m] == x) {
+                    ans = m;
+                    r = m - 1;  // keep searching left to find the earliest one
+                } else if (a[m] >= x) {
+                    r = m - 1;
+                }
+                else l = m + 1;
+            }
+            return ans;
+        }
+
+    upper_bound (Finds the LAST occurrence)
+
+        public static void upper_bound(long[] a, int l, int r, long x) {
+            long ans = r + 1;       // default if not found
+            while (l <= r) {
+                int m = (l + r) / 2;
+                if (a[m] == x) {
+                     ans = x;
+                     r = m - 1; // but keep searching the RIGHT to find latest
+                }
+                else if (a[m] >= x) {
+                    r = m - 1;
+                }
+                else l = m + 1;
+            }
+            return ans;
+        }
+
+
+
+
+Let's say a = [1, 2, 2, 2, 5] and K = 4.
+When j = 0, a[j] = 1. We need Target = 3.
+
+    lower_bound searches for 3. It doesn't exist. Returns 5 (which is n).
+
+    upper_bound searches for 3. Returns 5.
+
+    if (dow <= 4) is False. ans remains 0.
+
+When j = 1, a[j] = 2. We need Target = 2.
+
+    lower_bound searches for 2. Finds the first 2 at index 1.
+
+    upper_bound searches for 2. Finds the last 2 at index 3.
+
+    ans += 3 - 1 + 1 = 3. (Because there are 3 pairs
+
+
+
+
+
+
+
+
+
+
+
+
+
+    import java.util.Arrays;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int t = sc.nextInt();
+        while (t-- > 0) {
+             int n = sc.nextInt();
+             long k = sc.nextLong();
+             long[] a = new long[n];
+             for (int j = 0; j < n; ++j) {
+                a[j] = sc.nextLong();
+             }
+             Arrays.sort(a);
+
+             long ans = 0;
+             for (int j = 0; j < n - 1; ++j) {
+                long up = upper_bound(a, j + 1, n - 1, k - a[j]);
+                long dow = lower_boud(a, j + 1, n - 1, k - a[j]);
+                if (dow <= n - 1) {
+                    ans += up - dow + 1;
+                }
+             }
+             System.out.println(ans);
+        }
+    }
+
+    public static long lower_boud(long[] a, int l, int r, long x) {
+        long ans = r + 1;
+        while (l <= r) {
+            int m = (l + r) / 2;
+            if (a[m] == x) {
+                ans = m;
+                r = m - 1;
+            }
+            else if (a[m] >= x) {
+                r = m - 1;
+            }
+            else l = m + 1;
+        }
+        return ans;
+    }
+
+    public static long upper_bound(long[] a, int l, int r, long x) {
+        long ans = r + 1;
+        while (l <= r) {
+            int m = (l + r) / 2;
+            if (a[m] == x) {
+                ans = m;
+                l = m + 1;
+            }
+            else if (a[m] >= x) {
+                r = m - 1;
+            }
+            else l = m + 1;
+        }
+        return ans;
+    }
+}
