@@ -1,60 +1,37 @@
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
+
+    // standard euclidean algorithm for GCD
+    public static long gcd(long a, long b) {
+        if (b == 0) return a;
+        return gcd(b, a % b);   // recursive call
+    }
+
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        int t = sc.nextInt();
-        while (t-- > 0) {
-             int n = sc.nextInt();
-             long k = sc.nextLong();
-             long[] a = new long[n];
-             for (int j = 0; j < n; ++j) {
-                a[j] = sc.nextLong();
-             }
-             Arrays.sort(a);
 
-             long ans = 0;
-             for (int j = 0; j < n - 1; ++j) {
-                long up = upper_bound(a, j + 1, n - 1, k - a[j]);
-                long dow = lower_boud(a, j + 1, n - 1, k - a[j]);
-                if (dow <= n - 1) {
-                    ans += up - dow + 1;
-                }
-             }
-             System.out.println(ans);
-        }
-    }
+        int n = sc.nextInt();
 
-    public static long lower_boud(long[] a, int l, int r, long x) {
-        long ans = r + 1;
-        while (l <= r) {
-            int m = (l + r) / 2;
-            if (a[m] == x) {
-                ans = m;
-                r = m - 1;
-            }
-            else if (a[m] >= x) {
-                r = m - 1;
-            }
-            else l = m + 1;
-        }
-        return ans;
-    }
+        // use long cuz a[i] can be up to 10^9
+        long[] a = new long[n];
 
-    public static long upper_bound(long[] a, int l, int r, long x) {
-        long ans = r + 1;
-        while (l <= r) {
-            int m = (l + r) / 2;
-            if (a[m] == x) {
-                ans = m;
-                l = m + 1;
-            }
-            else if (a[m] >= x) {
-                r = m - 1;
-            }
-            else l = m + 1;
+        for (int i = 0; i < n; ++i) {
+            a[i] = sc.nextLong();
         }
-        return ans;
+
+        // the answer -> is gcd of the entire array -> we can find it by taking gcd of first two, then gcd of that result with the third,
+        // and so on...
+        long ans = a[0];
+        for (int i = 0; i < n; ++i) {
+            ans = gcd(ans, a[i]);
+
+            // optimize: if gcd = 1 -> it can never get smaller -> we can break early
+            if (ans == 1) break;
+
+        }
+
+        System.out.println(ans);
+        sc.close();
     }
 }

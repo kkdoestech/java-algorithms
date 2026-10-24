@@ -1405,3 +1405,452 @@ public class Main {
         return ans;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+input:
+    2
+    [()]{}{()()}
+    [(])
+output:
+    YES
+    NO
+
+
+
+-> valid parentheses -> use stack 
+    -> iamgine you're washing dishes. you stack clean plates on top of each other. when you need a plate -> you take the one on the very top 
+        -> you can't pull one from the bottom without kocking everything over
+            -> this is stack (LIFO: last in first out)
+                -> for brackets to be valid -> they must be "properly nested"
+                    -> this means the most recently opened bracket => must be the first one to close
+
+    ex: If you have {[()]}, the ( opens last, so it must close first with ). Then [ closes, then {.
+
+    A Stack is perfect because we can just push opening brackets on top, and when we see a closing bracket, we just check the top of the pile.
+
+
+2. The isValid Function (The Brain)
+    public static boolean isValid(String s) {
+        Stack<Character> st = new Stack<>();        
+    }
+        -> we initialize an empty Stack that will hold Character (letters/symbols)
+
+    for (int i = 0; i < s.length(); ++i) {
+        char k = s.charAt(i);
+    }
+        -> we loop through the string 1 character at a tim. -> k is the current character we are looking at.
+
+    Handling Closing Brackets
+
+        switch(k) {
+            case ')':
+                if (st.empty() || st.peek() != '(') return false;
+                st.pop();
+                break;
+        }
+
+            + st.empty(): if we see a closing bracket ) -> but our stack is completely empty -> it means there's no opening bracket to match it
+            eg: string is ")(" -> invalid.
+
+            st.peek() != '(': peek() looks at the top plate in the pile. If the top plate is [ but we need to close with ), they don't match! Invalid.
+
+            st.pop(): If both checks pass, the ( is matched. We pop() (remove) the ( from the top of the stack and continue.
+
+    Handling Opening Brackets:
+
+        default:
+            st.push(k);
+            break;
+
+        
+            If the character is not a closing bracket, it must be an opening bracket ((, [, {). We push() it onto the top of our stack.
+
+
+
+The Final Check (The Fix)
+
+    }
+    return st.empty(); 
+}
+
+    Why is this so important? Imagine the input is "(((".
+
+    The loop will push all three ( onto the stack. The loop ends. There were no errors inside the loop.
+
+    If we just return true;, we would say "(((" is valid, which is wrong!
+
+    If the stack is empty at the end, it means every opening bracket was successfully matched and popped. If there are still brackets left, it's invalid. st.empty() returns true if valid, and false if invalid.
+
+
+
+
+3. The main Function (Handling Input)
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int t = sc.nextInt(); // Read number of test cases
+        while (t-- > 0) {
+            String s = sc.next(); // Read the string
+            if (isValid(s)) {
+                System.out.println("YES");
+            } else {
+                System.out.println("NO");
+            }
+        }
+        sc.close();
+    }
+
+
+
+
+
+
+4. Visual Dry Run (Let's trace it!)
+
+Let's trace a valid string: {[()]}
+
+    Read {: Push to stack. Stack: [ { ]
+
+    Read [: Push to stack. Stack: [ {, [ ]
+
+    Read (: Push to stack. Stack: [ {, [, ( ]
+
+    Read ): Top is (. Match! Pop it. Stack: [ {, [ ]
+
+    Read ]: Top is [. Match! Pop it. Stack: [ { ]
+
+    Read }: Top is {. Match! Pop it. Stack: [ ] (Empty)
+
+    Loop ends. st.empty() is true. Output: YES.
+
+Let's trace an invalid string: ([)]
+
+    Read (: Push. Stack: [ ( ]
+
+    Read [: Push. Stack: [ (, [ ]
+
+    Read ): Top is [. Does [ match )? NO.
+
+    Instantly return false. Output: NO. (Notice how we didn't even finish reading the string, we already knew it was invalid!)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import java.util.Scanner;
+import java.util.Stack;
+
+public class Main {
+    public static int Check(String s) {
+        Stack<Character> st = new Stack<>();
+        for (int i = 0; i < s.length(); ++i) {
+            char k = s.charAt(i);
+            switch(k) {
+                case ')':
+                    if (st.empty() || st.peek() != '(') {
+                        return 0;
+                    }
+                    st.pop();
+                    break;
+                case ']':
+                    if (st.empty() || st.peek() != '[') {
+                        return 0;
+                    }
+                    st.pop();
+                    break;
+                case '}':
+                    if (st.empty() || st.peek() != '{'){
+                        return 0;
+                    }
+                    st.pop();
+                    break;
+                default:
+                    st.push(k);
+                    break;
+            }
+        }
+        return 1;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int t = sc.nextInt();
+        while (t-- > 0) {
+            String s = sc.next();
+            if (Check(s) == 1) {
+                System.out.println("YES");
+            }
+            else {
+                System.out.println("NO");
+            }
+        }
+        sc.close();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+There are N monsters, numbered 1, 2, ..., M
+Initially, the health of Monster i -> is A[i]
+Below, a monster with at least 1 health -> is called alive
+
+until there is only 1 alive monster, the following is repeated:
+    + a random alive monster -> attacks another random alive monster
+    + as a result, the health of the monster attacked is reduced by the amount equal to the current health of the monster attacking.
+
+find the minimum possible final health of the last monster alive.
+
+Constraints
+
+    All values in input are integers.
+    2≤ N ≤ 10^5
+    1 ≤ Ai ​≤ 10^9
+
+
+
+
+Input
+
+Input is given from Standard Input in the following format:
+
+N
+A1​ A2​ ... AN​
+
+Output
+
+Print the minimum possible final health of the last monster alive.
+
+
+
+
+Sample Input 1
+4
+2 10 8 40
+
+Sample Output 1
+2
+
+When only the first monster keeps on attacking, the final health of the last monster will be 2, which is minimum.
+
+
+
+
+Sample Input 2
+
+
+4
+5 13 8 1000000000
+
+Sample Output 2
+
+
+1
+
+Sample Input 3
+
+
+3
+1000000000 1000000000 1000000000
+
+Sample Output 3
+
+
+1000000000
+
+
+
+
+
+
+1. The "Aha!" Moment: The euclidean algorithm
+
+    Sample Input 1
+    4
+    2 10 8 40
+
+    Sample Output 1
+    2
+
+
+    -> look at what happens when Monster A (health = 10) attacks Monster B (health = 8)
+        -> B health becomes 8 - 10 = -2 -> Monster B dies
+
+    Wait, the problem says "health is reduced by". So if A attacks B, B becomes 8−10=−2 (dead). But what if B attacks A? A becomes 10−8=2
+
+
+    Let's trace Monster A (10) and Monster B (8):
+
+    B attacks A: A becomes 2.
+
+    A (2) attacks B (8): B becomes 6.
+
+    A (2) attacks B (6): B becomes 4.
+
+    A (2) attacks B (4): B becomes 2.
+
+    A (2) attacks B (2): B becomes 0 (B dies). A survives with 2 health.
+
+Look at that result: 2. What is the Greatest Common Divisor (GCD) of 10 and 8? It's 2!
+
+    -> Whenever two monsters fight until one dies, the survivor's health will always be the GCD of their initial healths. The attack mechanic (b = b - a) is exactly how the Euclidean algorithm works mathematically.
+
+    2. Extending to N Monsters
+
+        If you have many monsters, they can all attack the same monster, or fight each other. But no matter what order they fight in, the final surviving health will always be a multiple of the GCD of the entire array.
+
+        To get the minimum possible final health, we want to reduce it as much as possible. By carefully choosing who attacks whom, we can always force the final survivor's health to be exactly:
+        GCD(A1,A2,A3,…,AN)
+
+
+
+        ![alt text](image-1.png)
+
+
+
+
+
+
+import java.util.Scanner;
+
+public class Main {
+
+    // standard euclidean algorithm for GCD
+    public static long gcd(long a, long b) {
+        if (b == 0) return a;
+        return gcd(b, a % b);   // recursive call
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        int n = sc.nextInt();
+
+        // use long cuz a[i] can be up to 10^9
+        long[] a = new long[n];
+
+        for (int i = 0; i < n; ++i) {
+            a[i] = sc.nextLong();
+        }
+
+        // the answer -> is gcd of the entire array -> we can find it by taking gcd of first two, then gcd of that result with the third,
+        // and so on...
+        long ans = a[0];
+        for (int i = 0; i < n; ++i) {
+            ans = gcd(ans, a[i]);
+
+            // optimize: if gcd = 1 -> it can never get smaller -> we can break early
+            if (ans == 1) break;
+
+        }
+
+        System.out.println(ans);
+        sc.close();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
